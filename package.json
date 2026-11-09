@@ -25,7 +25,12 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:validate": "prisma validate",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "docker:build": "docker build -t store-keeper-server .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up"
   },
   "dependencies": {
     "@nest-lab/throttler-storage-redis": "^1.2.0",

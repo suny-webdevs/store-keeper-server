@@ -9,9 +9,7 @@ export default defineConfig({
   },
   engine: 'classic',
   datasource: {
-    url: process.env.DATABASE_URL
-      ? env('DATABASE_URL')
-      : 'postgresql://postgres:password@localhost:5432/postgres',
-    directUrl: process.env.DIRECT_URL ? env('DIRECT_URL') : undefined,
+    url: process.env.DATABASE_URL ?? env('DATABASE_URL'),
+    directUrl: process.env.DIRECT_URL ?? env('DIRECT_URL'),
   },
 });

@@ -1,0 +1,46 @@
+# Dependency and build directories
+node_modules
+dist
+coverage
+
+# Version control and editor metadata
+.git
+.gitignore
+.github
+.claude
+.codex
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and runtime artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Documentation and scratch files
+TEST.md
+BUILD.md
+README.md
+
+# Linting, formatting, and test files
+.oxlintrc.json
+.prettierrc
+tsconfig.build.tsbuildinfo
+test
+**/*.spec.ts
+**/*.test.ts
+vitest.config*.ts
+

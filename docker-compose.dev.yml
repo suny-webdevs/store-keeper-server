@@ -1,0 +1,83 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: store-keeper-server-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/storekeeper?schema=public}
+      DIRECT_URL: ${DIRECT_URL:-postgresql://postgres:postgres@postgres:5432/storekeeper?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      SUPABASE_URL: ${SUPABASE_URL:-http://localhost:54321}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      RUN_MIGRATIONS: "false"
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - storekeeper-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: store-keeper-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-storekeeper}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-storekeeper}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - storekeeper-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: store-keeper-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes --save 60 1 --loglevel warning
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - storekeeper-network
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+networks:
+  storekeeper-network:
+    driver: bridge
+
