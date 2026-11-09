@@ -11,16 +11,16 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 4000
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/storekeeper?schema=public}
-      DIRECT_URL: ${DIRECT_URL:-postgresql://postgres:postgres@postgres:5432/storekeeper?schema=public}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      SUPABASE_URL: ${SUPABASE_URL:-http://localhost:54321}
+      DATABASE_URL: ${DATABASE_URL:-"postgresql://postgres.wteimlnpygsyhkpgrafk:AzU0BY2yjHJLkhSm@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"}
+      DIRECT_URL: ${DIRECT_URL:-"postgresql://postgres.wteimlnpygsyhkpgrafk:AzU0BY2yjHJLkhSm@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres"}
+      REDIS_URL: ${REDIS_URL:-"rediss://default:gQAAAAAAAtNOAAIgcDE1MDZiMTBkZTUxZDU0OGNjOWE4ODhhNWU0YmJlMjYwOQ@uncommon-mullet-185166.upstash.io:6379"}
+      SUPABASE_URL: ${SUPABASE_URL:-https://wteimlnpygsyhkpgrafk.supabase.co}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      SENTRY_DSN: ${SENTRY_DSN:-}
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      SENTRY_DSN: ${SENTRY_DSN:-"https://daf6bb33d28c9203c34c5386574ecfa5@o4512400844587008.ingest.us.sentry.io/4512400881418240"}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-dzarjul50}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-372397489471433}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-HknkYFB-QG7c7ft86t1HDjiOEHg}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       RUN_SEED: ${RUN_SEED:-false}
     depends_on:
