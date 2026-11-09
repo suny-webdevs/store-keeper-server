@@ -1,3 +1,6 @@
+// dotenv/config is loaded first so DATABASE_URL and DIRECT_URL are in process.env
+// before Prisma's WASM schema parser runs. When prisma.config.ts is detected,
+// Prisma skips its own .env loading — this import compensates for that.
 import 'dotenv/config';
 import { defineConfig, env } from 'prisma/config';
 
@@ -7,9 +10,7 @@ export default defineConfig({
     path: 'prisma/migrations',
     seed: 'bun run prisma/seed.ts',
   },
-  engine: 'classic',
   datasource: {
-    url: process.env.DATABASE_URL ?? env('DATABASE_URL'),
-    directUrl: process.env.DIRECT_URL ?? env('DIRECT_URL'),
+    url: env('DIRECT_URL'),
   },
 });
