@@ -45,6 +45,7 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(PrismaService.name);
+  private readonly extendedClient: any;
 
   constructor() {
     super({
@@ -54,13 +55,44 @@ export class PrismaService
       ],
     });
 
-    this.setupTenantMiddleware();
+    this.extendedClient = this.setupTenantExtension();
+
+    return new Proxy(this, {
+      get(target: any, prop: string | symbol, receiver: any) {
+        if (
+          prop === 'onModuleInit' ||
+          prop === 'onModuleDestroy' ||
+          prop === 'logger' ||
+          prop === 'extendedClient' ||
+          prop === '$on'
+        ) {
+          const val = target[prop];
+          return typeof val === 'function' ? val.bind(target) : val;
+        }
+
+        if (target.extendedClient && target.extendedClient[prop] !== undefined) {
+          const val = target.extendedClient[prop];
+          if (typeof val === 'function') {
+            return val.bind(target.extendedClient);
+          }
+          return val;
+        }
+
+        const fallback = Reflect.get(target, prop, receiver);
+        if (typeof fallback === 'function') {
+          return fallback.bind(target);
+        }
+        return fallback;
+      },
+    });
   }
 
   async onModuleInit(): Promise<void> {
-    // Log Prisma warnings/errors
-    (this as any).$on('warn', (e: any) => this.logger.warn(e.message));
-    (this as any).$on('error', (e: any) => this.logger.error(e.message));
+    // Log Prisma warnings/errors if supported
+    if (typeof (this as any).$on === 'function') {
+      (this as any).$on('warn', (e: any) => this.logger.warn(e.message));
+      (this as any).$on('error', (e: any) => this.logger.error(e.message));
+    }
 
     await this.$connect();
     this.logger.log('Prisma connected to database');
@@ -72,60 +104,64 @@ export class PrismaService
   }
 
   /**
-   * Tenant-scoping middleware.
+   * Tenant-scoping client extension.
    * Reads tenantId from AsyncLocalStorage and auto-injects it into queries.
    * Skips when no tenant context is present (bootstrap queries, public endpoints).
    */
-  private setupTenantMiddleware(): void {
-    (this as any).$use(async (params: any, next: (params: any) => Promise<any>) => {
-      const store = tenantStore.getStore();
-      const tenantId = store?.tenantId;
+  private setupTenantExtension(): any {
+    return this.$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ model, operation, args, query }: any) {
+            const store = tenantStore.getStore();
+            const tenantId = store?.tenantId;
 
-      // Skip if no tenant context or model isn't tenant-scoped
-      if (!tenantId || !params.model || !TENANT_SCOPED_MODELS.has(params.model)) {
-        return next(params);
-      }
+            // Skip if no tenant context or model isn't tenant-scoped
+            if (!tenantId || !model || !TENANT_SCOPED_MODELS.has(model)) {
+              return query(args);
+            }
 
-      const action = params.action;
+            // ── Read operations: inject tenantId into WHERE ──
+            if (READ_ACTIONS.has(operation)) {
+              args = args ?? {};
+              args.where = { ...args.where, tenantId };
+            }
 
-      // ── Read operations: inject tenantId into WHERE ──
-      if (READ_ACTIONS.has(action)) {
-        params.args = params.args ?? {};
-        params.args.where = { ...params.args.where, tenantId };
-      }
+            // ── Create: inject tenantId into DATA ──
+            if (operation === 'create') {
+              args = args ?? {};
+              args.data = { ...args.data, tenantId };
+            }
 
-      // ── Create: inject tenantId into DATA ──
-      if (action === 'create') {
-        params.args = params.args ?? {};
-        params.args.data = { ...params.args.data, tenantId };
-      }
+            // ── CreateMany: inject tenantId into each row ──
+            if (operation === 'createMany') {
+              args = args ?? {};
+              if (Array.isArray(args.data)) {
+                args.data = args.data.map(
+                  (row: Record<string, unknown>) => ({ ...row, tenantId }),
+                );
+              } else {
+                args.data = { ...args.data, tenantId };
+              }
+            }
 
-      // ── CreateMany: inject tenantId into each row ──
-      if (action === 'createMany') {
-        params.args = params.args ?? {};
-        if (Array.isArray(params.args.data)) {
-          params.args.data = params.args.data.map(
-            (row: Record<string, unknown>) => ({ ...row, tenantId }),
-          );
-        } else {
-          params.args.data = { ...params.args.data, tenantId };
-        }
-      }
+            // ── Update/Delete with WHERE: inject tenantId ──
+            if (WRITE_FILTER_ACTIONS.has(operation)) {
+              args = args ?? {};
+              args.where = { ...args.where, tenantId };
+            }
 
-      // ── Update/Delete with WHERE: inject tenantId ──
-      if (WRITE_FILTER_ACTIONS.has(action)) {
-        params.args = params.args ?? {};
-        params.args.where = { ...params.args.where, tenantId };
-      }
+            // ── Upsert: inject tenantId into WHERE + CREATE ──
+            if (operation === 'upsert') {
+              args = args ?? {};
+              args.where = { ...args.where, tenantId };
+              args.create = { ...args.create, tenantId };
+            }
 
-      // ── Upsert: inject tenantId into WHERE + CREATE ──
-      if (action === 'upsert') {
-        params.args = params.args ?? {};
-        params.args.where = { ...params.args.where, tenantId };
-        params.args.create = { ...params.args.create, tenantId };
-      }
-
-      return next(params);
+            return query(args);
+          },
+        },
+      },
     });
   }
 }
