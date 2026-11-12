@@ -44,3 +44,9 @@ test
 **/*.test.ts
 vitest.config*.ts
 
+# Platform-specific Prisma binaries (Linux ones are fetched during docker build)
+**/*.dylib.node
+**/*-darwin-arm64
+**/*-darwin-x64
+**/*-windows-*
+
