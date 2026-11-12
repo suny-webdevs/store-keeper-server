@@ -96,16 +96,29 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules ./node_modules
 
 # ── Prisma 7: overwrite with the generate-enriched @prisma/client and engines
-#    @prisma/client  — runtime client + WASM query engine + schema.prisma copy
-#    .prisma/client  — hash-named generated artefacts (types, query compiler)
-#    @prisma/engines — schema-engine binary required by `prisma migrate deploy`
-#    prisma binary   — CLI entry-point used by docker-entrypoint.sh
+#    @prisma/client              — runtime client + WASM query engine + schema copy
+#    .prisma/client              — hash-named generated artefacts (types, query compiler)
+#    @prisma/engines             — schema-engine binary for `prisma migrate deploy`
+#    @prisma/adapter-pg          — pg driver adapter for Prisma 7 (required, no url in schema)
+#    @prisma/driver-adapter-utils— adapter utilities (peer dep of adapter-pg)
+#    pg                          — native PostgreSQL client used by adapter-pg
+#    prisma binary               — CLI entry-point used by docker-entrypoint.sh
 # ────────────────────────────────────────────────────────────────────────────
-COPY --from=dependencies /app/node_modules/@prisma/client   ./node_modules/@prisma/client
-COPY --from=dependencies /app/node_modules/.prisma          ./node_modules/.prisma
-COPY --from=dependencies /app/node_modules/@prisma/engines  ./node_modules/@prisma/engines
-COPY --from=dependencies /app/node_modules/prisma           ./node_modules/prisma
-COPY --from=dependencies /app/node_modules/.bin/prisma      ./node_modules/.bin/prisma
+COPY --from=dependencies /app/node_modules/@prisma/client              ./node_modules/@prisma/client
+COPY --from=dependencies /app/node_modules/.prisma                     ./node_modules/.prisma
+COPY --from=dependencies /app/node_modules/@prisma/engines             ./node_modules/@prisma/engines
+COPY --from=dependencies /app/node_modules/@prisma/adapter-pg          ./node_modules/@prisma/adapter-pg
+COPY --from=dependencies /app/node_modules/@prisma/driver-adapter-utils ./node_modules/@prisma/driver-adapter-utils
+COPY --from=dependencies /app/node_modules/pg                          ./node_modules/pg
+COPY --from=dependencies /app/node_modules/pg-cloudflare               ./node_modules/pg-cloudflare
+COPY --from=dependencies /app/node_modules/pg-connection-string        ./node_modules/pg-connection-string
+COPY --from=dependencies /app/node_modules/pg-int8                     ./node_modules/pg-int8
+COPY --from=dependencies /app/node_modules/pg-pool                     ./node_modules/pg-pool
+COPY --from=dependencies /app/node_modules/pg-protocol                 ./node_modules/pg-protocol
+COPY --from=dependencies /app/node_modules/pg-types                    ./node_modules/pg-types
+COPY --from=dependencies /app/node_modules/pgpass                      ./node_modules/pgpass
+COPY --from=dependencies /app/node_modules/prisma                      ./node_modules/prisma
+COPY --from=dependencies /app/node_modules/.bin/prisma                 ./node_modules/.bin/prisma
 
 # ── Application artefacts ────────────────────────────────────────────────────
 COPY --from=builder /app/dist           ./dist

@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { tenantStore } from '../common/tenant-context.js';
 
 /**
@@ -48,7 +49,16 @@ export class PrismaService
   private readonly extendedClient: any;
 
   constructor() {
+    // Prisma 7 requires a driver adapter when no `url` is set in schema.prisma.
+    // PrismaPg uses DATABASE_URL (the pooled Supabase connection) for all
+    // runtime queries. DIRECT_URL is only used by the CLI (prisma.config.ts)
+    // for migrations, which bypass pgBouncer.
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL,
+    });
+
     super({
+      adapter,
       log: [
         { emit: 'event', level: 'warn' },
         { emit: 'event', level: 'error' },
