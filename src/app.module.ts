@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -24,6 +25,34 @@ import { TenantContextInterceptor } from './common/tenant.interceptor.js';
 import { EnvelopeInterceptor } from './common/envelope.interceptor.js';
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
 
+const require = createRequire(import.meta.url);
+
+function resolveLogTransport() {
+  // Cloud platforms (Render, etc.), CI, tests, and production must use standard JSON stdout
+  if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.RENDER === 'true' ||
+    process.env.CI === 'true' ||
+    process.env.NODE_ENV === 'test'
+  ) {
+    return undefined;
+  }
+
+  // In local development, only use pino-pretty if installed and resolvable
+  try {
+    require.resolve('pino-pretty');
+    return {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        singleLine: true,
+      },
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 @Module({
   imports: [
     ConfigModule,
@@ -46,16 +75,7 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
           '*.accessToken',
           '*.refreshToken',
         ],
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? {
-                target: 'pino-pretty',
-                options: {
-                  colorize: true,
-                  singleLine: true,
-                },
-              }
-            : undefined,
+        transport: resolveLogTransport(),
       },
     }),
     ThrottlerModule.forRootAsync({
