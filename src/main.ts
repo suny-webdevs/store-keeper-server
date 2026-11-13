@@ -18,6 +18,9 @@ async function bootstrap() {
   // Structured Logging via Pino
   app.useLogger(app.get(Logger));
 
+  // Global Route Prefix for all endpoints (/api)
+  app.setGlobalPrefix('api');
+
   // Initialize Sentry if DSN is configured
   if (config.SENTRY_DSN) {
     Sentry.init({
@@ -77,7 +80,7 @@ async function bootstrap() {
     }),
   );
 
-  // OpenAPI (Swagger) Documentation at /docs and /docs-json
+  // OpenAPI (Swagger) Documentation at /api/docs and /api/docs-json
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Store Keeper API')
     .setDescription('Multi-tenant, branch-scoped store management API')
@@ -103,8 +106,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document, {
-    jsonDocumentUrl: 'docs-json',
+  SwaggerModule.setup('api/docs', app, document, {
+    jsonDocumentUrl: 'api/docs-json',
   });
 
   const port = config.PORT ?? 4000;

@@ -9,7 +9,7 @@ WORKDIR /app
 
 # openssl  → Prisma schema-engine binary (migrate deploy)
 # ca-certs → TLS connections to Supabase / external services
-# curl     → healthcheck probe (GET /v1/health)
+# curl     → healthcheck probe (GET /api/v1/health)
 # dumb-init→ PID-1 signal forwarding for graceful shutdown
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
@@ -134,9 +134,9 @@ USER nodejs
 
 EXPOSE 4000
 
-# Liveness probe — hits the public /v1/health endpoint
+# Liveness probe — hits the public /api/v1/health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD curl -f http://localhost:4000/v1/health || exit 1
+  CMD curl -f http://localhost:4000/api/v1/health || exit 1
 
 ENTRYPOINT ["dumb-init", "--", "./docker-entrypoint.sh"]
 CMD ["node", "dist/main.js"]
