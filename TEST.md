@@ -14,25 +14,25 @@
    - [Error Response Envelope](#22-error-response-envelope)
    - [Standard Error Codes](#23-standard-error-codes)
    - [Security & Guard Chain](#24-security--guard-chain)
-3. [Health & Readiness Endpoints (`/v1/health`)](#3-health--readiness-endpoints-v1health)
-   - [`GET /v1/health` (Liveness Probe)](#31-get-v1health-liveness-probe)
-   - [`GET /v1/health/ready` (Readiness Probe)](#32-get-v1healthready-readiness-probe)
-4. [Authentication Endpoints (`/v1/auth`)](#4-authentication-endpoints-v1auth)
-   - [`GET /v1/auth/me` (Get Current User Profile)](#41-get-v1authme-get-current-user-profile)
-5. [Branches Management Endpoints (`/v1/branches`)](#5-branches-management-endpoints-v1branches)
-   - [`GET /v1/branches` (List Accessible Branches)](#51-get-v1branches-list-accessible-branches)
-   - [`POST /v1/branches` (Create Branch)](#52-post-v1branches-create-branch)
-   - [`GET /v1/branches/:id` (Get Branch by ID)](#53-get-v1branchesid-get-branch-by-id)
-   - [`PATCH /v1/branches/:id` (Update Branch)](#54-patch-v1branchesid-update-branch)
-   - [`DELETE /v1/branches/:id` (Soft-Delete Branch)](#55-delete-v1branchesid-soft-delete-branch)
-6. [User Management Endpoints (`/v1/users`)](#6-user-management-endpoints-v1users)
-   - [`GET /v1/users` (List Tenant Users with Pagination)](#61-get-v1users-list-tenant-users-with-pagination)
-   - [`POST /v1/users/invite` (Invite User to Tenant)](#62-post-v1usersinvite-invite-user-to-tenant)
-   - [`PATCH /v1/users/:id` (Update User Profile/Roles)](#63-patch-v1usersid-update-user-profileroles)
-   - [`DELETE /v1/users/:id` (Deactivate / Soft-Delete User)](#64-delete-v1usersid-deactivate--soft-delete-user)
-   - [`POST /v1/users/:id/branches` (Assign Branch Access)](#65-post-v1usersidbranches-assign-branch-access)
-   - [`PATCH /v1/users/:id/branches/:branchId` (Update Branch Role)](#66-patch-v1usersidbranchesbranchid-update-branch-role)
-   - [`DELETE /v1/users/:id/branches/:branchId` (Remove Branch Access)](#67-delete-v1usersidbranchesbranchid-remove-branch-access)
+3. [Health & Readiness Endpoints (`/api/v1/health`)](#3-health--readiness-endpoints-apiv1health)
+   - [`GET /api/v1/health` (Liveness Probe)](#31-get-apiv1health-liveness-probe)
+   - [`GET /api/v1/health/ready` (Readiness Probe)](#32-get-apiv1healthready-readiness-probe)
+4. [Authentication Endpoints (`/api/v1/auth`)](#4-authentication-endpoints-apiv1auth)
+   - [`GET /api/v1/auth/me` (Get Current User Profile)](#41-get-apiv1authme-get-current-user-profile)
+5. [Branches Management Endpoints (`/api/v1/branches`)](#5-branches-management-endpoints-apiv1branches)
+   - [`GET /api/v1/branches` (List Accessible Branches)](#51-get-apiv1branches-list-accessible-branches)
+   - [`POST /api/v1/branches` (Create Branch)](#52-post-apiv1branches-create-branch)
+   - [`GET /api/v1/branches/:id` (Get Branch by ID)](#53-get-apiv1branchesid-get-branch-by-id)
+   - [`PATCH /api/v1/branches/:id` (Update Branch)](#54-patch-apiv1branchesid-update-branch)
+   - [`DELETE /api/v1/branches/:id` (Soft-Delete Branch)](#55-delete-apiv1branchesid-soft-delete-branch)
+6. [User Management Endpoints (`/api/v1/users`)](#6-user-management-endpoints-apiv1users)
+   - [`GET /api/v1/users` (List Tenant Users with Pagination)](#61-get-apiv1users-list-tenant-users-with-pagination)
+   - [`POST /api/v1/users/invite` (Invite User to Tenant)](#62-post-apiv1usersinvite-invite-user-to-tenant)
+   - [`PATCH /api/v1/users/:id` (Update User Profile/Roles)](#63-patch-apiv1usersid-update-user-profileroles)
+   - [`DELETE /api/v1/users/:id` (Deactivate / Soft-Delete User)](#64-delete-apiv1usersid-deactivate--soft-delete-user)
+   - [`POST /api/v1/users/:id/branches` (Assign Branch Access)](#65-post-apiv1usersidbranches-assign-branch-access)
+   - [`PATCH /api/v1/users/:id/branches/:branchId` (Update Branch Role)](#66-patch-apiv1usersidbranchesbranchid-update-branch-role)
+   - [`DELETE /api/v1/users/:id/branches/:branchId` (Remove Branch Access)](#67-delete-apiv1usersidbranchesbranchid-remove-branch-access)
 7. [Running the Test Suite with Bun](#7-running-the-test-suite-with-bun)
 
 ---
@@ -132,14 +132,14 @@ For non-public endpoints, the request must traverse:
 
 ---
 
-## 3. Health & Readiness Endpoints (`/v1/health`)
+## 3. Health & Readiness Endpoints (`/api/v1/health`)
 
-### 3.1 `GET /v1/health` (Liveness Probe)
+### 3.1 `GET /api/v1/health` (Liveness Probe)
 Verifies process liveness without checking external dependencies (DB/Redis). Marked `@Public()`.
 
 #### Request
 ```http
-GET /v1/health HTTP/1.1
+GET /api/v1/health HTTP/1.1
 Host: localhost:4000
 ```
 
@@ -162,12 +162,12 @@ Host: localhost:4000
 
 ---
 
-### 3.2 `GET /v1/health/ready` (Readiness Probe)
+### 3.2 `GET /api/v1/health/ready` (Readiness Probe)
 Pings both PostgreSQL database (`SELECT 1`) and Redis (`PING`). Marked `@Public()`.
 
 #### Request
 ```http
-GET /v1/health/ready HTTP/1.1
+GET /api/v1/health/ready HTTP/1.1
 Host: localhost:4000
 ```
 
@@ -227,14 +227,14 @@ Host: localhost:4000
 
 ---
 
-## 4. Authentication Endpoints (`/v1/auth`)
+## 4. Authentication Endpoints (`/api/v1/auth`)
 
-### 4.1 `GET /v1/auth/me` (Get Current User Profile)
+### 4.1 `GET /api/v1/auth/me` (Get Current User Profile)
 Returns the authenticated user's profile and branch permissions loaded from JWT + database (cached in Redis).
 
 #### Request
 ```http
-GET /v1/auth/me HTTP/1.1
+GET /api/v1/auth/me HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <valid_jwt_token>
 ```
@@ -354,16 +354,16 @@ Authorization: Bearer <valid_jwt_token>
 
 ---
 
-## 5. Branches Management Endpoints (`/v1/branches`)
+## 5. Branches Management Endpoints (`/api/v1/branches`)
 
-### 5.1 `GET /v1/branches` (List Accessible Branches)
+### 5.1 `GET /api/v1/branches` (List Accessible Branches)
 Returns branches visible to the user:
 - Users with global `OWNER` or `ADMIN` roles receive all active tenant branches.
 - Users with branch-only roles (`CASHIER`, `MANAGER`, `VIEWER`) receive only assigned active branches.
 
 #### Request (Global OWNER / ADMIN)
 ```http
-GET /v1/branches HTTP/1.1
+GET /api/v1/branches HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <owner_or_admin_jwt>
 ```
@@ -447,7 +447,7 @@ Only returns the branch where the cashier has active assignment:
 
 ---
 
-### 5.2 `POST /v1/branches` (Create Branch)
+### 5.2 `POST /api/v1/branches` (Create Branch)
 Creates a new branch. Requires:
 - Global role: `OWNER` or `ADMIN`
 - CSRF Double-Submit protection (`X-CSRF-Token` header matching `csrf_token` cookie)
@@ -455,7 +455,7 @@ Creates a new branch. Requires:
 
 #### Request
 ```http
-POST /v1/branches HTTP/1.1
+POST /api/v1/branches HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -589,12 +589,12 @@ Occurs when a user with `CASHIER` role attempts branch creation:
 
 ---
 
-### 5.3 `GET /v1/branches/:id` (Get Branch by ID)
+### 5.3 `GET /api/v1/branches/:id` (Get Branch by ID)
 Retrieves a branch by its unique identifier.
 
 #### Request
 ```http
-GET /v1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
+GET /api/v1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <jwt_token>
 ```
@@ -641,12 +641,12 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-### 5.4 `PATCH /v1/branches/:id` (Update Branch)
+### 5.4 `PATCH /api/v1/branches/:id` (Update Branch)
 Updates branch details. Requires `OWNER` or `ADMIN` role + CSRF token.
 
 #### Request
 ```http
-PATCH /v1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
+PATCH /api/v1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -719,14 +719,14 @@ Content-Type: application/json
 
 ---
 
-### 5.5 `DELETE /v1/branches/:id` (Soft-Delete Branch)
+### 5.5 `DELETE /api/v1/branches/:id` (Soft-Delete Branch)
 Soft-deletes a branch. **Strict Business Invariants:**
 1. Only the global **`OWNER`** can delete a branch (`ADMIN` is forbidden).
 2. Deletion is **blocked with 409 Conflict** if any product has active stock on hand (`qtyOnHand > 0`).
 
 #### Request (OWNER on Zero-Stock Branch)
 ```http
-DELETE /v1/branches/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22 HTTP/1.1
+DELETE /api/v1/branches/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <owner_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -790,16 +790,16 @@ Cookie: csrf_token=test-valid-csrf-token-abc123xyz789
 
 ---
 
-## 6. User Management Endpoints (`/v1/users`)
+## 6. User Management Endpoints (`/api/v1/users`)
 
 All endpoints in this group require `@RequireGlobalRole('OWNER', 'ADMIN')` at the controller level.
 
-### 6.1 `GET /v1/users` (List Tenant Users with Pagination)
+### 6.1 `GET /api/v1/users` (List Tenant Users with Pagination)
 Lists all tenant users with pagination metadata and branch assignment details.
 
 #### Request
 ```http
-GET /v1/users?page=1&limit=10 HTTP/1.1
+GET /api/v1/users?page=1&limit=10 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 ```
@@ -906,12 +906,12 @@ Authorization: Bearer <admin_jwt>
 
 ---
 
-### 6.2 `POST /v1/users/invite` (Invite User to Tenant)
+### 6.2 `POST /api/v1/users/invite` (Invite User to Tenant)
 Creates a new tenant user and optionally assigns branch roles within an atomic transaction.
 
 #### Request
 ```http
-POST /v1/users/invite HTTP/1.1
+POST /api/v1/users/invite HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -999,12 +999,12 @@ Content-Type: application/json
 
 ---
 
-### 6.3 `PATCH /v1/users/:id` (Update User Profile/Roles)
+### 6.3 `PATCH /api/v1/users/:id` (Update User Profile/Roles)
 Updates user fields (`fullName`, `globalRole`, `isActive`) and automatically invalidates the Redis cached profile `sk:user:profile:${id}`.
 
 #### Request
 ```http
-PATCH /v1/users/user-cashier-1 HTTP/1.1
+PATCH /api/v1/users/user-cashier-1 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -1057,12 +1057,12 @@ Content-Type: application/json
 
 ---
 
-### 6.4 `DELETE /v1/users/:id` (Deactivate / Soft-Delete User)
+### 6.4 `DELETE /api/v1/users/:id` (Deactivate / Soft-Delete User)
 Soft-deletes user (`deletedAt: now()`, `isActive: false`) and evicts their Redis profile cache.
 
 #### Request
 ```http
-DELETE /v1/users/user-cashier-1 HTTP/1.1
+DELETE /api/v1/users/user-cashier-1 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -1108,12 +1108,12 @@ Cookie: csrf_token=test-valid-csrf-token-abc123xyz789
 
 ---
 
-### 6.5 `POST /v1/users/:id/branches` (Assign Branch Access)
+### 6.5 `POST /api/v1/users/:id/branches` (Assign Branch Access)
 Assigns or upserts branch access role (`MANAGER`, `CASHIER`, `VIEWER`) to a user. Invalidates target user's cached profile.
 
 #### Request
 ```http
-POST /v1/users/user-admin-1/branches HTTP/1.1
+POST /api/v1/users/user-admin-1/branches HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -1182,12 +1182,12 @@ Content-Type: application/json
 
 ---
 
-### 6.6 `PATCH /v1/users/:id/branches/:branchId` (Update Branch Role)
+### 6.6 `PATCH /api/v1/users/:id/branches/:branchId` (Update Branch Role)
 Updates the role on an existing branch access assignment.
 
 #### Request
 ```http
-PATCH /v1/users/user-admin-1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
+PATCH /api/v1/users/user-admin-1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -1237,12 +1237,12 @@ Content-Type: application/json
 
 ---
 
-### 6.7 `DELETE /v1/users/:id/branches/:branchId` (Remove Branch Access)
+### 6.7 `DELETE /api/v1/users/:id/branches/:branchId` (Remove Branch Access)
 Removes user access from a branch and invalidates the cached profile.
 
 #### Request
 ```http
-DELETE /v1/users/user-admin-1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
+DELETE /api/v1/users/user-admin-1/branches/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 HTTP/1.1
 Host: localhost:4000
 Authorization: Bearer <admin_jwt>
 X-CSRF-Token: test-valid-csrf-token-abc123xyz789
@@ -1297,51 +1297,51 @@ bun /Users/macminim4/.gemini/antigravity/brain/69887880-5fe5-48cb-98db-ea3b37318
 ```text
 🚀 Starting Complete API In-Memory Test Suite with Bun...
 
-✅ [200] Health > GET /v1/health — Liveness probe (no dependencies)
-✅ [200] Health > GET /v1/health/ready — Readiness probe healthy (DB + Redis up)
-✅ [503] Health > GET /v1/health/ready — Readiness probe failing (Database down)
-✅ [503] Health > GET /v1/health/ready — Readiness probe failing (Redis down)
-✅ [200] Auth > GET /v1/auth/me — Success with valid JWT token
-✅ [401] Auth > GET /v1/auth/me — Error 401 when Authorization header is missing
-✅ [401] Auth > GET /v1/auth/me — Error 401 with malformed token
-✅ [401] Auth > GET /v1/auth/me — Error 401 with expired JWT token
-✅ [401] Auth > GET /v1/auth/me — Error 401 for deactivated user
-✅ [401] Auth > GET /v1/auth/me — Error 401 for non-existent user in DB
-✅ [200] Branches > GET /v1/branches — Success (OWNER sees all tenant branches)
-✅ [200] Branches > GET /v1/branches — Success (CASHIER sees only assigned active branches)
-✅ [401] Branches > GET /v1/branches — Error 401 unauthenticated
-✅ [201] Branches > POST /v1/branches — Success create new branch (ADMIN + CSRF)
-✅ [403] Branches > POST /v1/branches — Error 403 when CSRF token is missing on mutation
-✅ [403] Branches > POST /v1/branches — Error 403 when CSRF token mismatches cookie
-✅ [403] Branches > POST /v1/branches — Error 403 when user lacks OWNER/ADMIN role
-✅ [400] Branches > POST /v1/branches — Error 400 Validation failure (empty name, missing code)
-✅ [409] Branches > POST /v1/branches — Error 409 Conflict on duplicate branch code
-✅ [200] Branches > GET /v1/branches/:id — Success get branch details by ID
-✅ [404] Branches > GET /v1/branches/:id — Error 404 when branch not found
-✅ [200] Branches > PATCH /v1/branches/:id — Success update branch (ADMIN + CSRF)
-✅ [400] Branches > PATCH /v1/branches/:id — Error 400 with non-whitelisted properties
-✅ [404] Branches > PATCH /v1/branches/:id — Error 404 when updating non-existent branch
-✅ [409] Branches > DELETE /v1/branches/:id — Error 409 Conflict if branch has active stock on hand
-✅ [403] Branches > DELETE /v1/branches/:id — Error 403 when ADMIN tries to delete (OWNER required)
-✅ [200] Branches > DELETE /v1/branches/:id — Success soft-delete branch with 0 stock (OWNER)
-✅ [404] Branches > DELETE /v1/branches/:id — Error 404 when deleting non-existent branch
-✅ [200] Users > GET /v1/users — Success list tenant users with pagination (ADMIN)
-✅ [403] Users > GET /v1/users — Error 403 when non-admin accesses user management
-✅ [400] Users > GET /v1/users — Error 400 for invalid pagination parameters (page=0)
-✅ [201] Users > POST /v1/users/invite — Success invite new user with branch access (ADMIN + CSRF)
-✅ [409] Users > POST /v1/users/invite — Error 409 Conflict on duplicate email
-✅ [400] Users > POST /v1/users/invite — Error 400 Validation failure on invalid email
-✅ [200] Users > PATCH /v1/users/:id — Success update user profile (ADMIN + CSRF)
-✅ [404] Users > PATCH /v1/users/:id — Error 404 when updating non-existent user
-✅ [200] Users > DELETE /v1/users/:id — Success soft-delete / deactivate user (ADMIN + CSRF)
-✅ [404] Users > DELETE /v1/users/:id — Error 404 when deleting non-existent user
-✅ [201] Users > POST /v1/users/:id/branches — Success assign branch access (ADMIN + CSRF)
-✅ [404] Users > POST /v1/users/:id/branches — Error 404 when branch not found
-✅ [400] Users > POST /v1/users/:id/branches — Error 400 Validation failure on invalid role
-✅ [200] Users > PATCH /v1/users/:id/branches/:branchId — Success update branch role (ADMIN + CSRF)
-✅ [404] Users > PATCH /v1/users/:id/branches/:branchId — Error 404 when access record not found
-✅ [200] Users > DELETE /v1/users/:id/branches/:branchId — Success remove branch access (ADMIN + CSRF)
-✅ [404] Users > DELETE /v1/users/:id/branches/:branchId — Error 404 when user not found
+✅ [200] Health > GET /api/v1/health — Liveness probe (no dependencies)
+✅ [200] Health > GET /api/v1/health/ready — Readiness probe healthy (DB + Redis up)
+✅ [503] Health > GET /api/v1/health/ready — Readiness probe failing (Database down)
+✅ [503] Health > GET /api/v1/health/ready — Readiness probe failing (Redis down)
+✅ [200] Auth > GET /api/v1/auth/me — Success with valid JWT token
+✅ [401] Auth > GET /api/v1/auth/me — Error 401 when Authorization header is missing
+✅ [401] Auth > GET /api/v1/auth/me — Error 401 with malformed token
+✅ [401] Auth > GET /api/v1/auth/me — Error 401 with expired JWT token
+✅ [401] Auth > GET /api/v1/auth/me — Error 401 for deactivated user
+✅ [401] Auth > GET /api/v1/auth/me — Error 401 for non-existent user in DB
+✅ [200] Branches > GET /api/v1/branches — Success (OWNER sees all tenant branches)
+✅ [200] Branches > GET /api/v1/branches — Success (CASHIER sees only assigned active branches)
+✅ [401] Branches > GET /api/v1/branches — Error 401 unauthenticated
+✅ [201] Branches > POST /api/v1/branches — Success create new branch (ADMIN + CSRF)
+✅ [403] Branches > POST /api/v1/branches — Error 403 when CSRF token is missing on mutation
+✅ [403] Branches > POST /api/v1/branches — Error 403 when CSRF token mismatches cookie
+✅ [403] Branches > POST /api/v1/branches — Error 403 when user lacks OWNER/ADMIN role
+✅ [400] Branches > POST /api/v1/branches — Error 400 Validation failure (empty name, missing code)
+✅ [409] Branches > POST /api/v1/branches — Error 409 Conflict on duplicate branch code
+✅ [200] Branches > GET /api/v1/branches/:id — Success get branch details by ID
+✅ [404] Branches > GET /api/v1/branches/:id — Error 404 when branch not found
+✅ [200] Branches > PATCH /api/v1/branches/:id — Success update branch (ADMIN + CSRF)
+✅ [400] Branches > PATCH /api/v1/branches/:id — Error 400 with non-whitelisted properties
+✅ [404] Branches > PATCH /api/v1/branches/:id — Error 404 when updating non-existent branch
+✅ [409] Branches > DELETE /api/v1/branches/:id — Error 409 Conflict if branch has active stock on hand
+✅ [403] Branches > DELETE /api/v1/branches/:id — Error 403 when ADMIN tries to delete (OWNER required)
+✅ [200] Branches > DELETE /api/v1/branches/:id — Success soft-delete branch with 0 stock (OWNER)
+✅ [404] Branches > DELETE /api/v1/branches/:id — Error 404 when deleting non-existent branch
+✅ [200] Users > GET /api/v1/users — Success list tenant users with pagination (ADMIN)
+✅ [403] Users > GET /api/v1/users — Error 403 when non-admin accesses user management
+✅ [400] Users > GET /api/v1/users — Error 400 for invalid pagination parameters (page=0)
+✅ [201] Users > POST /api/v1/users/invite — Success invite new user with branch access (ADMIN + CSRF)
+✅ [409] Users > POST /api/v1/users/invite — Error 409 Conflict on duplicate email
+✅ [400] Users > POST /api/v1/users/invite — Error 400 Validation failure on invalid email
+✅ [200] Users > PATCH /api/v1/users/:id — Success update user profile (ADMIN + CSRF)
+✅ [404] Users > PATCH /api/v1/users/:id — Error 404 when updating non-existent user
+✅ [200] Users > DELETE /api/v1/users/:id — Success soft-delete / deactivate user (ADMIN + CSRF)
+✅ [404] Users > DELETE /api/v1/users/:id — Error 404 when deleting non-existent user
+✅ [201] Users > POST /api/v1/users/:id/branches — Success assign branch access (ADMIN + CSRF)
+✅ [404] Users > POST /api/v1/users/:id/branches — Error 404 when branch not found
+✅ [400] Users > POST /api/v1/users/:id/branches — Error 400 Validation failure on invalid role
+✅ [200] Users > PATCH /api/v1/users/:id/branches/:branchId — Success update branch role (ADMIN + CSRF)
+✅ [404] Users > PATCH /api/v1/users/:id/branches/:branchId — Error 404 when access record not found
+✅ [200] Users > DELETE /api/v1/users/:id/branches/:branchId — Success remove branch access (ADMIN + CSRF)
+✅ [404] Users > DELETE /api/v1/users/:id/branches/:branchId — Error 404 when user not found
 
 ─────────────────────────────────────────────────────────────
 📊 Test Summary: 45 PASSED, 0 FAILED out of 45 total tests

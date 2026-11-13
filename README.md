@@ -78,12 +78,12 @@
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **Runtime & Framework**       | [Node.js](https://nodejs.org/) (v20+) / [Bun](https://bun.sh/) &bull; [NestJS 10+](https://nestjs.com/) (Express platform) |
 | **Language**                  | [TypeScript](https://www.typescriptlang.org/) (Strict mode, ES Modules)                                                    |
-| **Database & ORM**            | [PostgreSQL 16](https://www.postgresql.org/) (Supabase-hosted) &bull; [Prisma ORM 6.x](https://www.prisma.io/)             |
+| **Database & ORM**            | [PostgreSQL 16](https://www.postgresql.org/) (Supabase-hosted) &bull; [Prisma ORM 7.x](https://www.prisma.io/) with `@prisma/adapter-pg` |
 | **Caching & In-Memory Store** | [Redis 7](https://redis.io/) (Upstash-compatible) via `ioredis`                                                            |
 | **Job Queue & Workers**       | [BullMQ](https://docs.bullmq.io/) (Redis-backed queues & processors)                                                       |
 | **Authentication**            | [Supabase Auth](https://supabase.com/auth) via JWKS verification (`jwks-rsa` + `jsonwebtoken`)                             |
 | **Validation & Schemas**      | `class-validator`, `class-transformer`, [Zod](https://zod.dev/) (Environment validation)                                   |
-| **Documentation**             | [Swagger / OpenAPI](https://swagger.io/) (`@nestjs/swagger`) at `/docs` and `/docs-json`                                   |
+| **Documentation**             | [Swagger / OpenAPI](https://swagger.io/) (`@nestjs/swagger`) at `/api/docs` and `/api/docs-json`                            |
 | **Security & Utilities**      | `helmet`, `cookie-parser`, `compression`, `@nestjs/throttler`                                                              |
 | **Logging & Monitoring**      | [Pino](https://getpino.io/) (`nestjs-pino`, structured JSON logs), [Sentry](https://sentry.io/)                            |
 | **Testing & Linting**         | [Vitest](https://vitest.dev/), [Supertest](https://github.com/ladjs/supertest), [Oxlint](https://oxc.rs/)                  |
@@ -321,82 +321,82 @@ The `CacheService.remember` implementation prevents cache stampedes using atomic
 
 ## API Reference
 
-Base URL prefix: `/v1`
+Base URL prefix: `/api/v1`
 
 ### Endpoint Groups
 
 #### Health & Readiness
 
-| Method | Endpoint           | Description                              | Auth   |
-| ------ | ------------------ | ---------------------------------------- | ------ |
-| `GET`  | `/v1/health`       | Liveness probe (no DB check)             | Public |
-| `GET`  | `/v1/health/ready` | Readiness probe (pings Postgres & Redis) | Public |
+| Method | Endpoint               | Description                              | Auth   |
+| ------ | ---------------------- | ---------------------------------------- | ------ |
+| `GET`  | `/api/v1/health`       | Liveness probe (no DB check)             | Public |
+| `GET`  | `/api/v1/health/ready` | Readiness probe (pings Postgres & Redis) | Public |
 
 #### Authentication
 
-| Method | Endpoint      | Description                                                 | Auth       |
-| ------ | ------------- | ----------------------------------------------------------- | ---------- |
-| `GET`  | `/v1/auth/me` | Returns current user profile, roles, and branch assignments | Bearer JWT |
+| Method | Endpoint          | Description                                                 | Auth       |
+| ------ | ----------------- | ----------------------------------------------------------- | ---------- |
+| `GET`  | `/api/v1/auth/me` | Returns current user profile, roles, and branch assignments | Bearer JWT |
 
 #### User Management
 
-| Method   | Endpoint                           | Description                       | Required Role    |
-| -------- | ---------------------------------- | --------------------------------- | ---------------- |
-| `GET`    | `/v1/users`                        | List tenant users (paginated)     | `OWNER`, `ADMIN` |
-| `POST`   | `/v1/users/invite`                 | Invite user via email             | `OWNER`, `ADMIN` |
-| `PATCH`  | `/v1/users/:id`                    | Update user status or global role | `OWNER`, `ADMIN` |
-| `DELETE` | `/v1/users/:id`                    | Soft delete user                  | `OWNER`          |
-| `POST`   | `/v1/users/:id/branches`           | Grant branch access               | `OWNER`, `ADMIN` |
-| `DELETE` | `/v1/users/:id/branches/:branchId` | Revoke branch access              | `OWNER`, `ADMIN` |
+| Method   | Endpoint                               | Description                       | Required Role    |
+| -------- | -------------------------------------- | --------------------------------- | ---------------- |
+| `GET`    | `/api/v1/users`                        | List tenant users (paginated)     | `OWNER`, `ADMIN` |
+| `POST`   | `/api/v1/users/invite`                 | Invite user via email             | `OWNER`, `ADMIN` |
+| `PATCH`  | `/api/v1/users/:id`                    | Update user status or global role | `OWNER`, `ADMIN` |
+| `DELETE` | `/api/v1/users/:id`                    | Soft delete user                  | `OWNER`          |
+| `POST`   | `/api/v1/users/:id/branches`           | Grant branch access               | `OWNER`, `ADMIN` |
+| `DELETE` | `/api/v1/users/:id/branches/:branchId` | Revoke branch access              | `OWNER`, `ADMIN` |
 
 #### Branches
 
-| Method   | Endpoint           | Description                               | Required Role    |
-| -------- | ------------------ | ----------------------------------------- | ---------------- |
-| `GET`    | `/v1/branches`     | List branches accessible to user          | Authenticated    |
-| `POST`   | `/v1/branches`     | Create branch                             | `OWNER`, `ADMIN` |
-| `GET`    | `/v1/branches/:id` | Get branch details                        | Branch access    |
-| `PATCH`  | `/v1/branches/:id` | Update branch metadata                    | `OWNER`, `ADMIN` |
-| `DELETE` | `/v1/branches/:id` | Soft delete branch (blocked if stock > 0) | `OWNER`          |
+| Method   | Endpoint               | Description                               | Required Role    |
+| -------- | ---------------------- | ----------------------------------------- | ---------------- |
+| `GET`    | `/api/v1/branches`     | List branches accessible to user          | Authenticated    |
+| `POST`   | `/api/v1/branches`     | Create branch                             | `OWNER`, `ADMIN` |
+| `GET`    | `/api/v1/branches/:id` | Get branch details                        | Branch access    |
+| `PATCH`  | `/api/v1/branches/:id` | Update branch metadata                    | `OWNER`, `ADMIN` |
+| `DELETE` | `/api/v1/branches/:id` | Soft delete branch (blocked if stock > 0) | `OWNER`          |
 
 #### Categories & Products
 
-| Method | Endpoint                      | Description                                     | Required Role |
-| ------ | ----------------------------- | ----------------------------------------------- | ------------- |
-| `GET`  | `/v1/categories`              | List categories (`?tree=true` for hierarchy)    | Authenticated |
-| `POST` | `/v1/categories`              | Create category with attribute schema           | `MANAGER`     |
-| `GET`  | `/v1/products`                | Search/filter products (full-text search `?q=`) | Authenticated |
-| `POST` | `/v1/products`                | Create product with variant definitions         | `MANAGER`     |
-| `POST` | `/v1/products/:id/image/sign` | Generate Cloudinary pre-signed upload URL       | `MANAGER`     |
+| Method | Endpoint                          | Description                                     | Required Role |
+| ------ | --------------------------------- | ----------------------------------------------- | ------------- |
+| `GET`  | `/api/v1/categories`              | List categories (`?tree=true` for hierarchy)    | Authenticated |
+| `POST` | `/api/v1/categories`              | Create category with attribute schema           | `MANAGER`     |
+| `GET`  | `/api/v1/products`                | Search/filter products (full-text search `?q=`) | Authenticated |
+| `POST` | `/api/v1/products`                | Create product with variant definitions         | `MANAGER`     |
+| `POST` | `/api/v1/products/:id/image/sign` | Generate Cloudinary pre-signed upload URL       | `MANAGER`     |
 
 #### Stock & Inventory Ledger
 
-| Method | Endpoint                             | Description                                       | Required Role       |
-| ------ | ------------------------------------ | ------------------------------------------------- | ------------------- |
-| `GET`  | `/v1/branches/:branchId/stock`       | List current stock levels                         | Branch access       |
-| `POST` | `/v1/branches/:branchId/stock-in`    | Receive stock (recalculates WAC)                  | `MANAGER`           |
-| `POST` | `/v1/branches/:branchId/adjustments` | Record shrinkage or adjustments                   | `MANAGER`           |
-| `GET`  | `/v1/branches/:branchId/ledger`      | Audit trail of inventory movements (cursor-based) | `MANAGER`, `VIEWER` |
+| Method | Endpoint                                 | Description                                       | Required Role       |
+| ------ | ---------------------------------------- | ------------------------------------------------- | ------------------- |
+| `GET`  | `/api/v1/branches/:branchId/stock`       | List current stock levels                         | Branch access       |
+| `POST` | `/api/v1/branches/:branchId/stock-in`    | Receive stock (recalculates WAC)                  | `MANAGER`           |
+| `POST` | `/api/v1/branches/:branchId/adjustments` | Record shrinkage or adjustments                   | `MANAGER`           |
+| `GET`  | `/api/v1/branches/:branchId/ledger`      | Audit trail of inventory movements (cursor-based) | `MANAGER`, `VIEWER` |
 
 #### Sales & POS
 
-| Method | Endpoint                       | Description                                     | Required Role |
-| ------ | ------------------------------ | ----------------------------------------------- | ------------- |
-| `GET`  | `/v1/branches/:branchId/sales` | List branch sales (cursor paginated)            | `CASHIER`+    |
-| `POST` | `/v1/branches/:branchId/sales` | Create sale (`?immediate=true` to auto-confirm) | `CASHIER`+    |
-| `POST` | `/v1/sales/:id/confirm`        | Finalize draft sale & deduct inventory          | `CASHIER`+    |
-| `POST` | `/v1/sales/:id/cancel`         | Cancel sale & restore stock                     | `MANAGER`     |
-| `POST` | `/v1/sales/:id/payments`       | Record payment against sale                     | `CASHIER`+    |
-| `GET`  | `/v1/sales/:id/receipt`        | Download printable PDF receipt                  | `CASHIER`+    |
+| Method | Endpoint                           | Description                                     | Required Role |
+| ------ | ---------------------------------- | ----------------------------------------------- | ------------- |
+| `GET`  | `/api/v1/branches/:branchId/sales` | List branch sales (cursor paginated)            | `CASHIER`+    |
+| `POST` | `/api/v1/branches/:branchId/sales` | Create sale (`?immediate=true` to auto-confirm) | `CASHIER`+    |
+| `POST` | `/api/v1/sales/:id/confirm`        | Finalize draft sale & deduct inventory          | `CASHIER`+    |
+| `POST` | `/api/v1/sales/:id/cancel`         | Cancel sale & restore stock                     | `MANAGER`     |
+| `POST` | `/api/v1/sales/:id/payments`       | Record payment against sale                     | `CASHIER`+    |
+| `GET`  | `/api/v1/sales/:id/receipt`        | Download printable PDF receipt                  | `CASHIER`+    |
 
 #### Analytics & Exports
 
-| Method | Endpoint                      | Description                                    | Required Role    |
-| ------ | ----------------------------- | ---------------------------------------------- | ---------------- |
-| `GET`  | `/v1/analytics/sales-summary` | Aggregated revenue, discount, and sale metrics | `MANAGER`+       |
-| `GET`  | `/v1/analytics/profit-loss`   | Gross profit and COGS analysis                 | `OWNER`, `ADMIN` |
-| `GET`  | `/v1/analytics/dead-stock`    | Products with zero movements in $N$ days       | `MANAGER`+       |
-| `POST` | `/v1/exports`                 | Request asynchronous CSV/PDF data export       | Authenticated    |
+| Method | Endpoint                          | Description                                    | Required Role    |
+| ------ | --------------------------------- | ---------------------------------------------- | ---------------- |
+| `GET`  | `/api/v1/analytics/sales-summary` | Aggregated revenue, discount, and sale metrics | `MANAGER`+       |
+| `GET`  | `/api/v1/analytics/profit-loss`   | Gross profit and COGS analysis                 | `OWNER`, `ADMIN` |
+| `GET`  | `/api/v1/analytics/dead-stock`    | Products with zero movements in $N$ days       | `MANAGER`+       |
+| `POST` | `/api/v1/exports`                 | Request asynchronous CSV/PDF data export       | Authenticated    |
 
 ---
 
@@ -510,8 +510,8 @@ CLOUDINARY_API_SECRET=""
    ```
 
 5. **Access OpenAPI Docs**:
-   - Swagger UI: `http://localhost:4000/docs`
-   - Raw OpenAPI JSON: `http://localhost:4000/docs-json`
+   - Swagger UI: `http://localhost:4000/api/docs`
+   - Raw OpenAPI JSON: `http://localhost:4000/api/docs-json`
 
 ---
 
@@ -521,6 +521,7 @@ CLOUDINARY_API_SECRET=""
 | ------------------------- | ------------------------------------------------ |
 | `bun run build`           | Compiles NestJS application to `dist/`           |
 | `bun run start:dev`       | Runs server in development watch mode            |
+| `bun run start:prod`      | Runs compiled server in production mode          |
 | `bun run lint`            | Runs type-aware linting via `oxlint`             |
 | `bun run format`          | Formats code with `prettier`                     |
 | `bun run test`            | Runs unit tests with Vitest                      |
@@ -532,6 +533,11 @@ CLOUDINARY_API_SECRET=""
 | `bun run prisma:deploy`   | Applies pending migrations in production         |
 | `bun run prisma:seed`     | Executes `prisma/seed.ts` idempotent seed script |
 | `bun run prisma:studio`   | Launches visual Prisma Studio database GUI       |
+| `bun run docker:build`    | Builds the production multi-stage Docker image   |
+| `bun run docker:up`       | Launches complete container stack via Compose    |
+| `bun run docker:down`     | Tears down containers and networks               |
+| `bun run docker:logs`     | Follows container log stream                     |
+| `bun run docker:dev`      | Starts local development environment in Docker   |
 
 ---
 
