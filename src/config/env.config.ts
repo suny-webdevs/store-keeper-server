@@ -17,6 +17,12 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   FRONTEND_URL: z.url().default('http://localhost:3000'),
 
+  // Public self-service tenant registration kill switch.
+  REGISTRATION_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+
   // Sentry (optional in dev)
   SENTRY_DSN: z.string().optional().default(''),
 

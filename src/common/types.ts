@@ -15,6 +15,15 @@ export interface RequestUser {
   branches: BranchAccess[];
 }
 
+/**
+ * Populated by RegistrationAuthGuard onto req.registrationIdentity.
+ * Represents a Supabase-authenticated user who does not yet have a tenant.
+ */
+export interface RegistrationIdentity {
+  userId: string;
+  email: string;
+}
+
 /* ──────────────────────────── Response Envelope ──────────────────────── */
 
 export interface EnvelopeError {
@@ -57,6 +66,12 @@ export const ErrorCode = {
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   AUTH_REQUIRED: 'AUTH_REQUIRED',
   AUTH_INVALID: 'AUTH_INVALID',
+  EMAIL_REQUIRED: 'EMAIL_REQUIRED',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  ACCOUNT_ALREADY_REGISTERED: 'ACCOUNT_ALREADY_REGISTERED',
+  EMAIL_IN_USE: 'EMAIL_IN_USE',
+  TENANT_SLUG_TAKEN: 'TENANT_SLUG_TAKEN',
+  REGISTRATION_DISABLED: 'REGISTRATION_DISABLED',
   CSRF_MISSING: 'CSRF_MISSING',
   CSRF_MISMATCH: 'CSRF_MISMATCH',
   FORBIDDEN: 'FORBIDDEN',
@@ -88,6 +103,7 @@ declare global {
       user?: RequestUser;
       branchId?: string;
       requestId?: string;
+      registrationIdentity?: RegistrationIdentity;
     }
   }
 }

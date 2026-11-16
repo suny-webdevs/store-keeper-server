@@ -39,6 +39,7 @@ describe('RedisService', () => {
     PORT: 4000,
     NODE_ENV: 'test',
     FRONTEND_URL: 'http://localhost:3000',
+    REGISTRATION_ENABLED: true,
     SENTRY_DSN: '',
     CLOUDINARY_CLOUD_NAME: '',
     CLOUDINARY_API_KEY: '',

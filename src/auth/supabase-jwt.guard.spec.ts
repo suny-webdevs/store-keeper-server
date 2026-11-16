@@ -4,6 +4,7 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { generateKeyPairSync } from 'node:crypto';
 import { SupabaseJwtGuard } from './supabase-jwt.guard.js';
+import { SupabaseAuthService } from './supabase-auth.service.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import type { RedisService } from '../redis/redis.service.js';
 import type { EnvConfig } from '../config/env.config.js';
@@ -22,6 +23,7 @@ describe('SupabaseJwtGuard', () => {
     PORT: 4000,
     NODE_ENV: 'test',
     FRONTEND_URL: 'http://localhost:3000',
+    REGISTRATION_ENABLED: true,
     SENTRY_DSN: '',
     CLOUDINARY_CLOUD_NAME: '',
     CLOUDINARY_API_KEY: '',
@@ -52,7 +54,7 @@ describe('SupabaseJwtGuard', () => {
       reflector,
       mockPrisma as PrismaService,
       mockRedis as RedisService,
-      mockConfig,
+      new SupabaseAuthService(mockRedis as RedisService, mockConfig),
     );
 
     // Mock Redis returning cached public key for test kid 'test-kid'

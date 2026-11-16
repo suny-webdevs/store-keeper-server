@@ -337,6 +337,89 @@ Base URL prefix: `/api/v1`
 | Method | Endpoint          | Description                                                 | Auth       |
 | ------ | ----------------- | ----------------------------------------------------------- | ---------- |
 | `GET`  | `/api/v1/auth/me` | Returns current user profile, roles, and branch assignments | Bearer JWT |
+| `POST` | `/api/v1/auth/register` | Creates a tenant and its OWNER from a verified Supabase session | Bearer JWT |
+
+#### Workspace Registration
+
+Self-service sign-up is a two-step flow because Supabase Auth remains the only
+identity provider:
+
+1. The client creates the account with Supabase Auth (email/password, OAuth,
+   etc.) and confirms the e-mail address.
+2. The client calls `POST /api/v1/auth/register` with the resulting Supabase
+   **access token**. The backend verifies the token and the verified e-mail,
+   then atomically creates the tenant and the caller's `OWNER` profile.
+
+The API never receives, stores, or logs a password — credential handling stays
+entirely inside Supabase Auth.
+
+```http
+POST /api/v1/auth/register
+Authorization: Bearer <supabase-access-token>
+Content-Type: application/json
+
+{
+  "tenantName": "Acme Retail",
+  "slug": "acme-retail",
+  "fullName": "Jane Doe"
+}
+```
+
+`slug` is optional and derived from `tenantName` when omitted. All fields are
+validated and unknown fields are rejected (`whitelist` + `forbidNonWhitelisted`).
+
+```json
+{
+  "success": true,
+  "message": "Created successfully",
+  "data": {
+    "tenant": {
+      "id": "0f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b",
+      "name": "Acme Retail",
+      "slug": "acme-retail",
+      "createdAt": "2026-11-14T04:30:00.000Z"
+    },
+    "user": {
+      "id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+      "tenantId": "0f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b",
+      "email": "owner@acme.com",
+      "fullName": "Jane Doe",
+      "globalRole": "OWNER"
+    }
+  },
+  "meta": {
+    "requestId": "c4b92c43-15be-443b-a279-3d0da7e721d0",
+    "timestamp": "2026-11-14T04:30:00.000Z"
+  }
+}
+```
+
+Security controls enforced by the endpoint:
+
+- **RS256 signature, issuer, audience, and expiry** are verified against the
+  Supabase JWKS (Redis-cached, refreshes on key rotation).
+- **Verified e-mail required** — confirmation state is read from Supabase Auth;
+  unconfirmed accounts receive `403 EMAIL_NOT_VERIFIED`.
+- **Identity comes from the token**, never the body: the owner `id` and `email`
+  are taken from the verified Supabase identity and `globalRole` is forced to
+  `OWNER`. Clients cannot choose a tenant id or role.
+- **No account takeover or replay**: one local account per Supabase user id, and
+  an e-mail can only own one active local account.
+- **Atomic creation** of tenant + owner in a single transaction; concurrent
+  unique-constraint collisions are mapped to deterministic `409` responses.
+- **Slug hardening**: normalized lowercase URL-safe slugs, reserved-name
+  denylist, and global uniqueness.
+- **Rate limited** to 5 requests/minute per client (auth throttler tier) and
+  audited as `tenant.register` (IP + user agent, fire-and-forget).
+- **Kill switch**: set `REGISTRATION_ENABLED=false` to close self-service
+  sign-ups (`403 REGISTRATION_DISABLED`).
+- CSRF does not apply: the request authenticates with a Bearer token and the
+  endpoint sets no cookies.
+
+Note: invited users created through `POST /api/v1/users/invite` still need a
+Supabase account linked to their real Supabase user id before they can sign in;
+see the follow-up note in the User Management section.
+
 
 #### User Management
 
@@ -348,6 +431,13 @@ Base URL prefix: `/api/v1`
 | `DELETE` | `/api/v1/users/:id`                    | Soft delete user                  | `OWNER`          |
 | `POST`   | `/api/v1/users/:id/branches`           | Grant branch access               | `OWNER`, `ADMIN` |
 | `DELETE` | `/api/v1/users/:id/branches/:branchId` | Revoke branch access              | `OWNER`, `ADMIN` |
+
+> **Known gap (outside the scope of registration):** `POST /api/v1/users/invite`
+> creates the local `User` row with a random UUID, but `User.id` must equal the
+> invitee's Supabase `auth.users.id`. Invited users therefore cannot
+> authenticate until the invite flow provisions the Supabase user through the
+> Admin API and stores its real UID. Self-service registration intentionally does
+> not claim or repair those placeholder rows.
 
 #### Branches
 
@@ -406,6 +496,12 @@ Base URL prefix: `/api/v1`
 | -------------------------------- | ---- | -------------------------------------------------------- |
 | `AUTH_REQUIRED`                  | 401  | Missing or malformed authorization header                |
 | `AUTH_INVALID`                   | 401  | JWT expired, invalid signature, or inactive user         |
+| `EMAIL_REQUIRED`                 | 403  | Supabase identity has no e-mail address                  |
+| `EMAIL_NOT_VERIFIED`             | 403  | E-mail must be confirmed before registering              |
+| `REGISTRATION_DISABLED`          | 403  | Self-service registration is turned off                  |
+| `ACCOUNT_ALREADY_REGISTERED`     | 409  | Supabase identity already has a local account            |
+| `EMAIL_IN_USE`                   | 409  | E-mail already owns an active local account              |
+| `TENANT_SLUG_TAKEN`              | 409  | Tenant slug is already in use                            |
 | `CSRF_MISSING` / `CSRF_MISMATCH` | 403  | Double-submit CSRF cookie validation failure             |
 | `FORBIDDEN`                      | 403  | Insufficient global or branch permissions                |
 | `NOT_FOUND`                      | 404  | Entity not found or belongs to another tenant            |
@@ -447,6 +543,7 @@ SUPABASE_ANON_KEY="eyJhbGciOi..."
 PORT=4000
 NODE_ENV="development" # development | production | test
 FRONTEND_URL="http://localhost:3000"
+REGISTRATION_ENABLED="true" # set "false" to disable self-service tenant sign-up
 
 # ── Optional Integrations ──────────────────────────────────
 SENTRY_DSN=""
